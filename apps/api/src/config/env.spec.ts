@@ -3,7 +3,12 @@ import { loadEnv } from './env.js';
 
 describe('loadEnv', () => {
   it('applies defaults when variables are missing', () => {
-    expect(loadEnv({})).toEqual({ NODE_ENV: 'development', PORT: 3000, LOG_LEVEL: 'info' });
+    expect(loadEnv({})).toEqual({
+      NODE_ENV: 'development',
+      PORT: 3000,
+      LOG_LEVEL: 'info',
+      CORS_ORIGINS: [],
+    });
   });
 
   it('parses PORT as a number', () => {
@@ -11,6 +16,7 @@ describe('loadEnv', () => {
       NODE_ENV: 'production',
       PORT: 8080,
       LOG_LEVEL: 'info',
+      CORS_ORIGINS: [],
     });
   });
 
@@ -32,6 +38,28 @@ describe('loadEnv', () => {
 
   it('rejects an unknown LOG_LEVEL', () => {
     expect(() => loadEnv({ LOG_LEVEL: 'loud' })).toThrow(/LOG_LEVEL/);
+  });
+
+  it('parses CORS_ORIGINS as a comma-separated list of origins', () => {
+    expect(
+      loadEnv({ CORS_ORIGINS: 'https://dashboard.example.com, http://localhost:3001' })
+        .CORS_ORIGINS,
+    ).toEqual(['https://dashboard.example.com', 'http://localhost:3001']);
+  });
+
+  it.each([
+    '*',
+    'example.com',
+    'https://example.com/',
+    'https://example.com/path',
+    'https://Example.com',
+  ])('rejects CORS_ORIGINS=%j, which is not an exact origin', (origin) => {
+    expect(() => loadEnv({ CORS_ORIGINS: origin })).toThrow(/CORS_ORIGINS/);
+  });
+
+  it('rejects more than 20 CORS origins', () => {
+    const origins = Array.from({ length: 21 }, (_, i) => `https://app${i}.example.com`).join(',');
+    expect(() => loadEnv({ CORS_ORIGINS: origins })).toThrow(/CORS_ORIGINS/);
   });
 
   it('does not echo the rejected value', () => {

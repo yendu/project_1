@@ -20,7 +20,7 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<NestE
     imports: [AppModule.register(env, { logDestination: options.logDestination }), ProbeModule],
   }).compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>(appOptions);
-  configureApp(app);
+  configureApp(app, env);
   await app.init();
   return app;
 }
