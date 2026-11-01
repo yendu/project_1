@@ -8,12 +8,15 @@ Rules for AI agents in this repository. Read this file and docs/domain.md before
 
 - Monorepo with pnpm workspaces. Backend in `apps/api`. Other apps come later.
 - Node.js 26 LTS, ES modules, pnpm 12 (installed via Homebrew; Corepack is not used)
-- TypeScript 6.0, strict. Not TypeScript 7: Nest CLI and typescript-eslint still need the TS 6 API.
+- TypeScript 6.0, strict. Not TypeScript 7: @nestjs/cli 12 depends on `typescript ~6.0`.
+  npm's `latest` tag is 7.x, so always install with an explicit `~6.0` range.
 - NestJS 12 on Express 5
 - Zod 4 through NestJS 12's built-in Standard Schema validation
   (`@Body({ schema })` + global `StandardSchemaValidationPipe`). No class-validator, no nestjs-zod.
 - PostgreSQL 18 (Docker locally), Drizzle ORM 0.45 + drizzle-kit 0.31, node-postgres (`pg`)
-- Vitest 5, Testcontainers 12 (real PostgreSQL in tests), supertest
+- Vitest 5 with Vite 8 (a required peer). Vite's Oxc transform emits the decorator metadata
+  Nest DI needs (`oxc.decorator` in `vitest.config.ts`); no SWC.
+- Testcontainers 12 (real PostgreSQL in tests), supertest
 - oxlint, Prettier, pino via nestjs-pino
 
 Several of these are newer than your training data. Before using an API, decorator or config
@@ -22,12 +25,17 @@ official docs. Never guess an API, flag or config key.
 
 ## Commands (run from the repo root)
 
-- `pnpm dev`: run the API with reload (start the database first: `pnpm db:up`)
+- `pnpm dev`: run the API with reload. Loads `apps/api/.env` if present (copy `.env.example`).
+  Don't switch to `nest start --env-file`: Node itself exits when that file is missing.
 - `pnpm check`: lint, typecheck and all tests. Must pass before any task is done.
-- `pnpm test`: unit + integration tests (Docker must be running)
-- `pnpm db:up` / `pnpm db:down`: local PostgreSQL
-- `pnpm db:generate`: SQL migration from schema changes
-- `pnpm db:migrate`: apply migrations
+- `pnpm lint`: oxlint + `prettier --check`. `pnpm format` rewrites files with Prettier.
+- `pnpm typecheck`: `tsc --noEmit`
+- `pnpm test`: unit + integration tests
+- `pnpm build`: compile the API to `apps/api/dist`
+
+Phase 2 adds (not yet available): `pnpm db:up` / `pnpm db:down` (local PostgreSQL),
+`pnpm db:generate` (SQL migration from schema changes), `pnpm db:migrate` (apply migrations).
+From then on `pnpm dev` needs `pnpm db:up` first and `pnpm test` needs Docker running.
 
 Keep this list accurate when scripts change.
 
@@ -54,7 +62,10 @@ Keep this list accurate when scripts change.
 - `src/modules/<feature>/`: thin controller (parse, call one service method, return),
   service (business rules), repository (all DB access for the module), Zod schemas, module file.
 - Modules never query another module's tables. They call that module's service.
-- Integration tests in `apps/api/test/`; unit tests next to code as `*.spec.ts`.
+- Integration tests in `apps/api/test/` as `*.test.ts`; unit tests next to code as `*.spec.ts`.
+- ESM with `nodenext`: relative imports end in `.js`. Classes injected through a constructor
+  are imported as values, never `import type`: decorator metadata needs the runtime class
+  (`verbatimModuleSyntax` makes `tsc` flag the mistake).
 
 ## API conventions
 
