@@ -1,5 +1,6 @@
 import { VersioningType, type NestApplicationOptions } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
+import { requestIdMiddleware } from './common/request-id.js';
 
 /** Options for creating the app, shared by main.ts and the tests. */
 export const appOptions = {} satisfies NestApplicationOptions;
@@ -9,6 +10,9 @@ export const appOptions = {} satisfies NestApplicationOptions;
  * exercise what production runs.
  */
 export function configureApp(app: NestExpressApplication): void {
+  // Express-level middleware runs in registration order, ahead of everything Nest adds at init.
+  app.use(requestIdMiddleware);
+
   // Controllers live under /v1 unless they opt out with VERSION_NEUTRAL (/healthz, /readyz).
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
 }
