@@ -5,6 +5,9 @@
     "correctness": "error",
     "suspicious": "warn"
   },
+  "rules": {
+    "typescript/no-extraneous-class": ["warn", { "allowWithDecorator": true }]
+  },
   "options": {
     "denyWarnings": true,
     "reportUnusedDisableDirectives": "warn"
