@@ -1,4 +1,4 @@
-import { Catch, Logger, type ArgumentsHost, type ExceptionFilter } from '@nestjs/common';
+import { Catch, type ArgumentsHost, type ExceptionFilter } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getRequestId } from '../request-id.js';
@@ -7,8 +7,6 @@ import { PROBLEM_CONTENT_TYPE, toProblem } from './problem.js';
 /** Answers every exception, thrown anywhere in the app, with RFC 9457 Problem Details. */
 @Catch()
 export class ProblemDetailsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(ProblemDetailsFilter.name);
-
   constructor(private readonly adapterHost: HttpAdapterHost) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
@@ -19,8 +17,9 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const problem = toProblem(exception, requestId);
 
     if (problem.status >= 500) {
-      // The client gets a generic problem; the details only go to the server log.
-      this.logger.error({ err: exception, requestId }, 'Unhandled exception');
+      // The client gets a generic problem; the details only go to the server log. req.log is
+      // set by pino-http, which runs before anything else, and is bound to the request id.
+      request.log.error({ err: exception }, 'Unhandled exception');
     }
 
     const { httpAdapter } = this.adapterHost;

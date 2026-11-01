@@ -5,7 +5,7 @@ import { appOptions, configureApp } from './app.setup.js';
 import { loadEnv } from './config/env.js';
 
 const env = loadEnv();
-const app = await NestFactory.create<NestExpressApplication>(AppModule, appOptions);
+const app = await NestFactory.create<NestExpressApplication>(AppModule.register(env), appOptions);
 configureApp(app);
 app.enableShutdownHooks();
 await app.listen(env.PORT);

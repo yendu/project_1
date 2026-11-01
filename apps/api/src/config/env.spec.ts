@@ -3,13 +3,14 @@ import { loadEnv } from './env.js';
 
 describe('loadEnv', () => {
   it('applies defaults when variables are missing', () => {
-    expect(loadEnv({})).toEqual({ NODE_ENV: 'development', PORT: 3000 });
+    expect(loadEnv({})).toEqual({ NODE_ENV: 'development', PORT: 3000, LOG_LEVEL: 'info' });
   });
 
   it('parses PORT as a number', () => {
     expect(loadEnv({ PORT: '8080', NODE_ENV: 'production' })).toEqual({
       NODE_ENV: 'production',
       PORT: 8080,
+      LOG_LEVEL: 'info',
     });
   });
 
@@ -23,6 +24,14 @@ describe('loadEnv', () => {
 
   it('rejects an unknown NODE_ENV', () => {
     expect(() => loadEnv({ NODE_ENV: 'staging' })).toThrow(/NODE_ENV/);
+  });
+
+  it.each(['debug', 'silent'])('accepts LOG_LEVEL=%s', (level) => {
+    expect(loadEnv({ LOG_LEVEL: level }).LOG_LEVEL).toBe(level);
+  });
+
+  it('rejects an unknown LOG_LEVEL', () => {
+    expect(() => loadEnv({ LOG_LEVEL: 'loud' })).toThrow(/LOG_LEVEL/);
   });
 
   it('does not echo the rejected value', () => {
