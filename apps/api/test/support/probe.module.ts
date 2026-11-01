@@ -1,9 +1,24 @@
-import { Body, Controller, Get, Module, Post } from '@nestjs/common';
+import { Body, Controller, Get, Module, Post, Query } from '@nestjs/common';
+import { z } from 'zod';
 import {
   BusinessRuleError,
   ConflictError,
   NotFoundError,
 } from '../../src/common/errors/app-error.js';
+
+const probeOrderSchema = z.strictObject({
+  name: z.string().trim().min(1).max(50),
+  items: z
+    .array(z.strictObject({ menuItemId: z.uuid(), quantity: z.int().min(1).max(20) }))
+    .min(1)
+    .max(10),
+});
+type ProbeOrder = z.infer<typeof probeOrderSchema>;
+
+const probeSearchSchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+type ProbeSearch = z.infer<typeof probeSearchSchema>;
 
 /** Test-only routes for exercising app-wide behavior. Never imported by the app itself. */
 @Controller('probe')
@@ -16,6 +31,16 @@ class ProbeController {
   @Post('echo')
   echo(@Body() body: unknown): unknown {
     return body;
+  }
+
+  @Post('orders')
+  createOrder(@Body({ schema: probeOrderSchema }) body: ProbeOrder): ProbeOrder {
+    return body;
+  }
+
+  @Get('search')
+  search(@Query({ schema: probeSearchSchema }) query: ProbeSearch): ProbeSearch {
+    return query;
   }
 
   @Get('not-found')
