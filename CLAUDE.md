@@ -61,7 +61,10 @@ Keep this list accurate when scripts change.
 
 ## Code structure (apps/api)
 
-- `src/main.ts` bootstraps; `src/app.module.ts` wires modules.
+- `src/main.ts` bootstraps; `src/app.module.ts` wires modules (`AppModule.register(env)`).
+- `src/app.setup.ts`: `configureApp()` holds app-wide middleware and settings (request IDs,
+  logging, helmet, CORS, body parser, versioning). main.ts and the tests both call it, so add
+  app-wide behavior there, never only in main.ts.
 - `src/config/`: env validated with Zod once at startup. No `process.env` anywhere else.
 - `src/db/`: Drizzle client, schema files in `src/db/schema/`. SQL migrations in `apps/api/drizzle/`.
 - `src/common/`: errors, validation, logging, request IDs.
@@ -69,6 +72,8 @@ Keep this list accurate when scripts change.
   service (business rules), repository (all DB access for the module), Zod schemas, module file.
 - Modules never query another module's tables. They call that module's service.
 - Integration tests in `apps/api/test/` as `*.test.ts`; unit tests next to code as `*.spec.ts`.
+  Build the app with `createTestApp()` from `test/support/`. Test-only routes go in
+  `test/support/probe.module.ts`; `LogCapture` asserts on real log output.
 - ESM with `nodenext`: relative imports end in `.js`. Classes injected through a constructor
   are imported as values, never `import type`: decorator metadata needs the runtime class
   (`verbatimModuleSyntax` makes `tsc` flag the mistake).
@@ -77,8 +82,12 @@ Keep this list accurate when scripts change.
 
 - Versioned paths (`/v1/...`), plural nouns. `/healthz` and `/readyz` unversioned.
 - Validate every input with Zod. `z.strictObject` for bodies. Bound every string, array, number.
+  Declare the schema on the parameter: `@Body({ schema })`, `@Query({ schema })`,
+  `@Param({ schema })`. A parameter without a schema is not validated at all.
 - Errors: RFC 9457 Problem Details (`application/problem+json`) with stable `code` and
-  `requestId`. Never return stack traces, SQL or internal messages.
+  `requestId`. Never return stack traces, SQL or internal messages. Services throw
+  `NotFoundError`, `ConflictError` or `BusinessRuleError` from `src/common/errors/` with a
+  snake_case `code`; their `detail` goes to the client as is. Anything else becomes a generic 500.
 - 400 malformed, 401 unauthenticated, 403 forbidden, 404 not found or not theirs,
   409 conflict, 422 business rule broken, 429 rate limited.
 - Lists: `{ items, nextCursor }`, keyset pagination, default 20, max 100. No OFFSET.
@@ -104,9 +113,12 @@ Keep this list accurate when scripts change.
 
 - Secrets from env vars; `.env` never committed; `.env.example` holds names and safe local values.
 - Never log bodies, tokens, cookies, passwords, card data or personal data. Log IDs and outcomes.
+  Log through `PinoLogger` (nestjs-pino), which carries the request id. The access log's fields
+  are an allow-list in `src/common/logging/http-logger.ts`; never widen it to headers or bodies.
 - Authorization: deny by default, ownership enforced inside the query, tokens verified (never decode-only).
 - Every outbound HTTP call has a timeout. No fetching user-supplied URLs without an allow-list.
-- Keep helmet, the CORS allow-list and the body size limit.
+- Keep helmet, the CORS allow-list (`CORS_ORIGINS`) and the 100 kB JSON body limit
+  (`src/app.setup.ts`).
 
 ## Definition of done
 

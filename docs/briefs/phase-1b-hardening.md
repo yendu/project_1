@@ -1,5 +1,14 @@
 # Phase 1b: API hardening
 
+## Status
+
+Done on 2026-11-01. Differences from the plan:
+
+- Versioning came first, together with the shared `configureApp()` the other tests needed.
+- Request IDs are their own Express middleware, ahead of the body parser, so requests that fail
+  while parsing still get one. pino-http reuses that id; nestjs-pino runs with `useExisting`.
+- No `ENV` provider yet: nothing outside `main.ts` and `AppModule.register` needs the env.
+
 ## Goal
 
 Settle the HTTP behavior every module will rely on (errors, request IDs, logging, validation,
