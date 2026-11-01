@@ -53,6 +53,12 @@ Keep this list accurate when scripts change.
 8. When done, report: what changed, how you verified it (commands and results), what you
    didn't do, and what I should review closely.
 
+## Branches
+
+- `develop` is the working branch. Commit there.
+- `main` only moves by merging `develop` into it, and only when I ask. Never commit to `main` directly.
+- Push only when I ask.
+
 ## Code structure (apps/api)
 
 - `src/main.ts` bootstraps; `src/app.module.ts` wires modules.
