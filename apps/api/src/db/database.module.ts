@@ -8,7 +8,7 @@ import {
   type OnModuleInit,
 } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { DatabaseError, Pool } from 'pg';
+import { Pool } from 'pg';
 import type { Env } from '../config/env.js';
 import { createDatabase, createPool, DB, PG_POOL } from './database.js';
 
@@ -25,13 +25,7 @@ class DatabaseLifecycle implements OnModuleInit, OnApplicationShutdown {
     // pg emits this when an idle connection dies (database restart, network).
     // Without a listener it is an uncaught exception that takes the process down.
     this.pool.on('error', (err) => {
-      // Picked fields only: pg attaches the whole connection to the error.
-      const summary = {
-        type: err.constructor.name,
-        code: err instanceof DatabaseError ? err.code : undefined,
-        message: err.message,
-      };
-      this.logger.error({ error: summary }, 'Idle database connection failed');
+      this.logger.error({ err }, 'Idle database connection failed');
     });
   }
 

@@ -66,7 +66,13 @@ describe('GET /readyz', () => {
     expect(logs.entries()).toContainEqual(
       expect.objectContaining({
         level: 50,
-        err: expect.objectContaining({ message: expect.stringContaining('ECONNREFUSED') }),
+        err: expect.objectContaining({
+          message: 'Database is not ready',
+          cause: expect.objectContaining({
+            query: 'select 1',
+            cause: expect.objectContaining({ code: 'ECONNREFUSED' }),
+          }),
+        }),
       }),
     );
     expect(logs.text).not.toContain('readiness-secret');

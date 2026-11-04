@@ -58,10 +58,12 @@ describe('database module', () => {
           context: 'DatabaseModule',
           msg: 'Idle database connection failed',
           // Exactly these fields: pg attaches the whole connection (host, user, cancel key).
-          error: {
+          err: {
             type: 'DatabaseError',
+            severity: 'FATAL',
             code: '57P01',
-            message: 'terminating connection due to administrator command',
+            routine: 'ProcessInterrupts',
+            stack: expect.any(String),
           },
         }),
       );

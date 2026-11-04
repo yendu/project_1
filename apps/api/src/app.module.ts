@@ -3,7 +3,7 @@ import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 import type { DestinationStream } from 'pino';
 import { ProblemDetailsFilter } from './common/errors/problem-details.filter.js';
-import { createHttpLogger, HTTP_LOGGER } from './common/logging/http-logger.js';
+import { createHttpLogger, HTTP_LOGGER, logSerializers } from './common/logging/http-logger.js';
 import { createValidationPipe } from './common/validation.js';
 import type { Env } from './config/env.js';
 import { DatabaseModule } from './db/database.module.js';
@@ -23,7 +23,10 @@ export class AppModule {
       imports: [
         // configureApp mounts httpLogger ahead of the body parser, so nestjs-pino reuses its
         // logger (useExisting) instead of adding its own pino-http after the parser.
-        LoggerModule.forRoot({ pinoHttp: { logger: httpLogger.logger }, useExisting: true }),
+        LoggerModule.forRoot({
+          pinoHttp: { logger: httpLogger.logger, serializers: logSerializers },
+          useExisting: true,
+        }),
         DatabaseModule.forRoot(env),
         HealthModule,
       ],
