@@ -23,6 +23,14 @@ const envSchema = z.object({
         .filter(Boolean),
     )
     .pipe(z.array(corsOrigin).max(20)),
+  // Required everywhere; holds the database password.
+  DATABASE_URL: z
+    .url({
+      protocol: /^postgres(ql)?$/,
+      error: 'Must be a postgres:// or postgresql:// URL',
+    })
+    .max(2_000),
+  DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
 });
 
 export type Env = z.infer<typeof envSchema>;

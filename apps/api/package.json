@@ -17,6 +17,7 @@
     "@nestjs/common": "^12.3.2",
     "@nestjs/core": "^12.3.2",
     "@nestjs/platform-express": "^12.3.2",
+    "drizzle-orm": "^0.45.4",
     "helmet": "^8.3.0",
     "nestjs-pino": "^5.3.1",
     "pg": "^8.23.1",
