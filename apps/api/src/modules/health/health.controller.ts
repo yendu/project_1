@@ -9,4 +9,9 @@ export class HealthController {
   check(): HealthResponse {
     return this.healthService.check();
   }
+
+  @Get('readyz')
+  ready(): Promise<HealthResponse> {
+    return this.healthService.ready();
+  }
 }
