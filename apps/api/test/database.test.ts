@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { Client } from 'pg';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 
@@ -23,5 +24,15 @@ describe('test database', () => {
   it('generates UUIDv7 keys with uuidv7()', async () => {
     const { rows } = await client.query<{ id: string }>('select uuidv7() as id');
     expect(rows[0]?.id).toMatch(UUID_V7);
+  });
+
+  it('has every committed migration applied', async () => {
+    const journalUrl = new URL('../drizzle/meta/_journal.json', import.meta.url);
+    const journal = JSON.parse(await readFile(journalUrl, 'utf8')) as { entries: unknown[] };
+    const { rows } = await client.query<{ count: string }>(
+      'select count(*) from drizzle.__drizzle_migrations',
+    );
+    expect(journal.entries.length).toBeGreaterThan(0);
+    expect(Number(rows[0]?.count)).toBe(journal.entries.length);
   });
 });

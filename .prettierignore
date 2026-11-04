@@ -1,1 +1,3 @@
 pnpm-lock.yaml
+# Written by drizzle-kit; reformatting them only adds noise to its diffs.
+apps/api/drizzle/meta
