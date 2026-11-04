@@ -7,7 +7,9 @@ Rules for AI agents in this repository. Read this file and docs/domain.md before
 ## Stack (versions are deliberate)
 
 - Monorepo with pnpm workspaces. Backend in `apps/api`. Other apps come later.
-- Node.js 26 LTS, ES modules, pnpm 12 (installed via Homebrew; Corepack is not used)
+- Node.js 26 LTS, ES modules, pnpm 12 (installed via Homebrew; Corepack is not used).
+  A new package with an install script fails `pnpm add` until `pnpm-workspace.yaml` lists it under
+  `allowBuilds`. Deny it (`pnpm approve-builds '!<name>'`) unless the package fails without it.
 - TypeScript 6.0, strict. Not TypeScript 7: @nestjs/cli 12 depends on `typescript ~6.0`.
   npm's `latest` tag is 7.x, so always install with an explicit `~6.0` range.
 - NestJS 12 on Express 5
@@ -25,17 +27,19 @@ official docs. Never guess an API, flag or config key.
 
 ## Commands (run from the repo root)
 
-- `pnpm dev`: run the API with reload. Loads `apps/api/.env` if present (copy `.env.example`).
+- `pnpm dev`: run the API with reload. Needs `pnpm db:up` and `DATABASE_URL`: copy
+  `apps/api/.env.example` to `apps/api/.env`, which is loaded if present.
   Don't switch to `nest start --env-file`: Node itself exits when that file is missing.
 - `pnpm check`: lint, typecheck and all tests. Must pass before any task is done.
 - `pnpm lint`: oxlint + `prettier --check`. `pnpm format` rewrites files with Prettier.
 - `pnpm typecheck`: `tsc --noEmit`
-- `pnpm test`: unit + integration tests
+- `pnpm test`: unit + integration tests. Needs Docker running; it starts its own PostgreSQL.
 - `pnpm build`: compile the API to `apps/api/dist`
-
-Phase 2 adds (not yet available): `pnpm db:up` / `pnpm db:down` (local PostgreSQL),
-`pnpm db:generate` (SQL migration from schema changes), `pnpm db:migrate` (apply migrations).
-From then on `pnpm dev` needs `pnpm db:up` first and `pnpm test` needs Docker running.
+- `pnpm db:up` / `pnpm db:down`: start local PostgreSQL and wait until it's healthy / stop it.
+  `db:down` keeps the data.
+- `pnpm db:generate`: SQL migration from schema changes. Add `--custom --name=<name>` for an
+  empty one to write by hand.
+- `pnpm db:migrate`: apply migrations to `DATABASE_URL`.
 
 Keep this list accurate when scripts change.
 
@@ -66,7 +70,9 @@ Keep this list accurate when scripts change.
   logging, helmet, CORS, body parser, versioning). main.ts and the tests both call it, so add
   app-wide behavior there, never only in main.ts.
 - `src/config/`: env validated with Zod once at startup. No `process.env` anywhere else.
-- `src/db/`: Drizzle client, schema files in `src/db/schema/`. SQL migrations in `apps/api/drizzle/`.
+- `src/db/`: global `DatabaseModule` with the pool and the Drizzle client. Repositories inject the
+  client with `@Inject(DB)`. Tables live in `src/db/schema/`, one file per module, re-exported from
+  its `index.ts`. SQL migrations in `apps/api/drizzle/`.
 - `src/common/`: errors, validation, logging, request IDs.
 - `src/modules/<feature>/`: thin controller (parse, call one service method, return),
   service (business rules), repository (all DB access for the module), Zod schemas, module file.
@@ -74,6 +80,8 @@ Keep this list accurate when scripts change.
 - Integration tests in `apps/api/test/` as `*.test.ts`; unit tests next to code as `*.spec.ts`.
   Build the app with `createTestApp()` from `test/support/`. Test-only routes go in
   `test/support/probe.module.ts`; `LogCapture` asserts on real log output.
+- `test/support/postgres.ts` starts one migrated PostgreSQL per test run, and every test app uses
+  it (`inject('databaseUrl')` gives the URL). Its image must match `docker-compose.yml`.
 - ESM with `nodenext`: relative imports end in `.js`. Classes injected through a constructor
   are imported as values, never `import type`: decorator metadata needs the runtime class
   (`verbatimModuleSyntax` makes `tsc` flag the mistake).
@@ -104,6 +112,8 @@ Keep this list accurate when scripts change.
   Never `drizzle-kit push` to a shared database. Never edit an applied migration.
 - On tables with data: CREATE INDEX CONCURRENTLY (own migration), FKs NOT VALID then
   VALIDATE, no in-place type changes or renames, `SET lock_timeout` before DDL.
+  Open issue: Drizzle's migrator runs all pending migrations in one transaction, where
+  CREATE INDEX CONCURRENTLY fails. Stop and ask before the first migration that needs it.
 - Parameters only. `sql.raw` never touches user input.
 - No external calls inside transactions. No read-then-write races: atomic
   `UPDATE ... WHERE ... RETURNING` or `SELECT ... FOR UPDATE`.
@@ -115,6 +125,8 @@ Keep this list accurate when scripts change.
 - Never log bodies, tokens, cookies, passwords, card data or personal data. Log IDs and outcomes.
   Log through `PinoLogger` (nestjs-pino), which carries the request id. The access log's fields
   are an allow-list in `src/common/logging/http-logger.ts`; never widen it to headers or bodies.
+  Log errors as `{ err }`: `src/common/logging/serialize-error.ts` is an allow-list too, and keeps
+  query parameters, row values and connection details out of the logs.
 - Authorization: deny by default, ownership enforced inside the query, tokens verified (never decode-only).
 - Every outbound HTTP call has a timeout. No fetching user-supplied URLs without an allow-list.
 - Keep helmet, the CORS allow-list (`CORS_ORIGINS`) and the 100 kB JSON body limit

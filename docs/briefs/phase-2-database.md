@@ -1,5 +1,18 @@
 # Phase 2: Database foundation
 
+## Status
+
+Done on 2026-11-04. Differences from the plan:
+
+- The error allow-list covers every logged error, not only database errors, and causes are logged
+  as nested objects. pino's defaults also leaked through joined cause messages, cause stacks and
+  Nest's `options.cause`, and copied fields such as body-parser's raw `body`.
+- The same serializers also go to nestjs-pino's own pino-http instance, which handles logs made
+  outside a request. pg-pool attaches the whole connection to idle errors, so those needed it too.
+- Added `idle_in_transaction_session_timeout` (10 s) next to the statement timeout.
+- `pnpm-workspace.yaml` denies the install scripts of `cpu-features`, `esbuild`, `protobufjs` and
+  `ssh2`. Everything runs without them.
+
 ## Goal
 
 Give the API a PostgreSQL 18 database it can rely on (locally, in tests and in the app) before the
