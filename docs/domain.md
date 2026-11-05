@@ -14,8 +14,11 @@ Every client is a responsive web app that works in desktop and phone browsers.
 
 ## Core entities
 
-customers, addresses, restaurants, restaurant_staff, opening_hours, menu_categories,
-menu_items, orders, order_items, payments, couriers, deliveries
+users, customers, addresses, restaurants, restaurant_staff, opening_hours, menu_categories,
+menu_items, orders, order_items, order_events, payments, refunds, stripe_events, couriers,
+deliveries
+
+The full data model is in docs/briefs/phase-3-data-model.md.
 
 ## Business rules
 
@@ -23,6 +26,10 @@ menu_items, orders, order_items, payments, couriers, deliveries
 - order_items store the unit price at order time. Menu price changes never change old orders.
 - A menu item can be marked unavailable or have limited daily stock. Stock must never go below 0,
   even when two customers order the last one at the same moment.
+- Stock comes back when an order expires, is rejected, or is cancelled before preparing. After
+  that the food is being made, so it doesn't.
+- Every login is one row in users, with one role per account.
+- The cart lives in the browser. At checkout the server recalculates every price.
 - Orders are only accepted while the restaurant is open and within its delivery radius.
 - Order total = items + delivery fee − discounts. Computed on the server, never trusted from the client.
   The first version has no discounts, so that term is 0 for now.
@@ -36,8 +43,11 @@ menu_items, orders, order_items, payments, couriers, deliveries
 
 ## Order lifecycle
 
-placed → accepted → preparing → ready_for_pickup → picked_up → delivered
+payment_pending → placed → accepted → preparing → ready_for_pickup → picked_up → delivered
 
+- payment_pending is internal: customers and staff never see it. Stock is reserved while the
+  customer confirms the card. It becomes placed when the card hold succeeds, or expired after
+  15 minutes.
 - From placed: rejected (by restaurant, or automatically after 5 minutes without an answer) or
   cancelled (by customer)
 - From accepted or preparing: cancelled (by restaurant or admin)
