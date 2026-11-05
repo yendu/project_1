@@ -1,0 +1,1 @@
+ALTER TABLE "menu_items" ADD CONSTRAINT "menu_items_stock_ceiling_check" CHECK ("menu_items"."stock_remaining" <= "menu_items"."daily_stock");

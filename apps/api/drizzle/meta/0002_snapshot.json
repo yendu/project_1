@@ -1,0 +1,527 @@
+{
+  "id": "71539032-4b4a-4f79-9014-117fc151a28d",
+  "prevId": "622cbc93-1ffb-4c5d-ba82-1fda44205ba4",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.menu_categories": {
+      "name": "menu_categories",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "menu_categories_restaurant_id_restaurants_id_fk": {
+          "name": "menu_categories_restaurant_id_restaurants_id_fk",
+          "tableFrom": "menu_categories",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "menu_categories_name_unique": {
+          "name": "menu_categories_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "restaurant_id",
+            "name"
+          ]
+        },
+        "menu_categories_id_restaurant_unique": {
+          "name": "menu_categories_id_restaurant_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "restaurant_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "menu_categories_position_check": {
+          "name": "menu_categories_position_check",
+          "value": "\"menu_categories\".\"position\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.menu_items": {
+      "name": "menu_items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price_cents": {
+          "name": "price_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "photo_key": {
+          "name": "photo_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_available": {
+          "name": "is_available",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "daily_stock": {
+          "name": "daily_stock",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stock_remaining": {
+          "name": "stock_remaining",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stock_date": {
+          "name": "stock_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "menu_items_restaurant_idx": {
+          "name": "menu_items_restaurant_idx",
+          "columns": [
+            {
+              "expression": "restaurant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "menu_items_category_idx": {
+          "name": "menu_items_category_idx",
+          "columns": [
+            {
+              "expression": "category_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "menu_items_restaurant_id_restaurants_id_fk": {
+          "name": "menu_items_restaurant_id_restaurants_id_fk",
+          "tableFrom": "menu_items",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "menu_items_category_fk": {
+          "name": "menu_items_category_fk",
+          "tableFrom": "menu_items",
+          "tableTo": "menu_categories",
+          "columnsFrom": [
+            "category_id",
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id",
+            "restaurant_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "menu_items_price_check": {
+          "name": "menu_items_price_check",
+          "value": "\"menu_items\".\"price_cents\" >= 0"
+        },
+        "menu_items_daily_stock_check": {
+          "name": "menu_items_daily_stock_check",
+          "value": "\"menu_items\".\"daily_stock\" > 0"
+        },
+        "menu_items_stock_remaining_check": {
+          "name": "menu_items_stock_remaining_check",
+          "value": "\"menu_items\".\"stock_remaining\" >= 0"
+        },
+        "menu_items_stock_day_check": {
+          "name": "menu_items_stock_day_check",
+          "value": "(\"menu_items\".\"stock_remaining\" is null) = (\"menu_items\".\"stock_date\" is null)"
+        },
+        "menu_items_stock_limit_check": {
+          "name": "menu_items_stock_limit_check",
+          "value": "\"menu_items\".\"daily_stock\" is not null or \"menu_items\".\"stock_remaining\" is null"
+        },
+        "menu_items_stock_ceiling_check": {
+          "name": "menu_items_stock_ceiling_check",
+          "value": "\"menu_items\".\"stock_remaining\" <= \"menu_items\".\"daily_stock\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.opening_hours": {
+      "name": "opening_hours",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weekday": {
+          "name": "weekday",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opens_at": {
+          "name": "opens_at",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "closes_at": {
+          "name": "closes_at",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "opening_hours_restaurant_id_restaurants_id_fk": {
+          "name": "opening_hours_restaurant_id_restaurants_id_fk",
+          "tableFrom": "opening_hours",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "opening_hours_slot_unique": {
+          "name": "opening_hours_slot_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "restaurant_id",
+            "weekday",
+            "opens_at"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "opening_hours_weekday_check": {
+          "name": "opening_hours_weekday_check",
+          "value": "\"opening_hours\".\"weekday\" between 1 and 7"
+        },
+        "opening_hours_times_check": {
+          "name": "opening_hours_times_check",
+          "value": "\"opening_hours\".\"opens_at\" < \"opening_hours\".\"closes_at\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.restaurants": {
+      "name": "restaurants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuidv7()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cuisine": {
+          "name": "cuisine",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'onboarding'"
+        },
+        "street": {
+          "name": "street",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "postal_code": {
+          "name": "postal_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "city": {
+          "name": "city",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "delivery_radius_m": {
+          "name": "delivery_radius_m",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "delivery_fee_cents": {
+          "name": "delivery_fee_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "delivery_minutes_min": {
+          "name": "delivery_minutes_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "delivery_minutes_max": {
+          "name": "delivery_minutes_max",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "photo_key": {
+          "name": "photo_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "restaurants_status_check": {
+          "name": "restaurants_status_check",
+          "value": "\"restaurants\".\"status\" in ('onboarding', 'active', 'paused')"
+        },
+        "restaurants_photo_check": {
+          "name": "restaurants_photo_check",
+          "value": "\"restaurants\".\"status\" = 'onboarding' or \"restaurants\".\"photo_key\" is not null"
+        },
+        "restaurants_latitude_check": {
+          "name": "restaurants_latitude_check",
+          "value": "\"restaurants\".\"latitude\" between -90 and 90"
+        },
+        "restaurants_longitude_check": {
+          "name": "restaurants_longitude_check",
+          "value": "\"restaurants\".\"longitude\" between -180 and 180"
+        },
+        "restaurants_delivery_radius_check": {
+          "name": "restaurants_delivery_radius_check",
+          "value": "\"restaurants\".\"delivery_radius_m\" > 0"
+        },
+        "restaurants_delivery_fee_check": {
+          "name": "restaurants_delivery_fee_check",
+          "value": "\"restaurants\".\"delivery_fee_cents\" >= 0"
+        },
+        "restaurants_delivery_minutes_check": {
+          "name": "restaurants_delivery_minutes_check",
+          "value": "\"restaurants\".\"delivery_minutes_min\" >= 1 and \"restaurants\".\"delivery_minutes_max\" >= \"restaurants\".\"delivery_minutes_min\""
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

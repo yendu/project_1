@@ -4,6 +4,8 @@ Rules for AI agents in this repository. Read this file and docs/domain.md before
 
 @docs/domain.md
 
+For any client UI work, also read docs/design.md.
+
 ## Stack (versions are deliberate)
 
 - Monorepo with pnpm workspaces. Backend in `apps/api`. Other apps come later.
@@ -72,7 +74,8 @@ Keep this list accurate when scripts change.
 - `src/config/`: env validated with Zod once at startup. No `process.env` anywhere else.
 - `src/db/`: global `DatabaseModule` with the pool and the Drizzle client. Repositories inject the
   client with `@Inject(DB)`. Tables live in `src/db/schema/`, one file per module, re-exported from
-  its `index.ts`. SQL migrations in `apps/api/drizzle/`.
+  its `index.ts`, with the shared id and timestamp columns in `columns.ts`. SQL migrations in
+  `apps/api/drizzle/`.
 - `src/common/`: errors, validation, logging, request IDs.
 - `src/modules/<feature>/`: thin controller (parse, call one service method, return),
   service (business rules), repository (all DB access for the module), Zod schemas, module file.
