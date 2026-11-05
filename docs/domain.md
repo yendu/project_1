@@ -24,18 +24,24 @@ menu_items, orders, order_items, payments, couriers, deliveries
 - Orders are only accepted while the restaurant is open and within its delivery radius.
 - Order total = items + delivery fee − discounts. Computed on the server, never trusted from the client.
   The first version has no discounts, so that term is 0 for now.
+- The delivery fee is one flat fee per restaurant, set during onboarding.
+- Customers can browse without an account. Placing an order requires signing in.
 - Staff only see their own restaurant's orders. Customers only see their own orders.
-- Deliveries are open offers: the first courier to accept gets the delivery.
+- Deliveries are open offers: the first courier to accept gets the delivery. If no courier accepts
+  within 10 minutes of an order reaching ready_for_pickup, admins are alerted.
 
 ## Order lifecycle
 
 placed → accepted → preparing → ready_for_pickup → picked_up → delivered
 
-- From placed: rejected (by restaurant) or cancelled (by customer)
+- From placed: rejected (by restaurant, or automatically after 5 minutes without an answer) or
+  cancelled (by customer)
 - From accepted or preparing: cancelled (by restaurant or admin)
+- From ready_for_pickup: cancelled (by admin)
 - From picked_up: delivery_failed (reported by the courier when delivery isn't possible)
 - From delivery_failed: delivered or cancelled (by admin)
-- Every status change is recorded with time and actor (order_events table).
+- Every status change is recorded with time and actor (order_events table). Automatic changes
+  record the system as actor, and a failed delivery also records the reason.
 - Invalid transitions return 409.
 
 ## Payments
@@ -44,6 +50,7 @@ placed → accepted → preparing → ready_for_pickup → picked_up → deliver
 - A rejected or cancelled order releases the authorization, so nothing was charged. Customers are
   told their payment hold was released, never that they were refunded.
 - Refunds only apply after capture: an admin issues them after delivery.
+- If a failed delivery ends in cancellation, the platform covers the cost of the food for now.
 - Stripe in test mode. Webhooks verified by signature and processed idempotently.
 
 ## Language
