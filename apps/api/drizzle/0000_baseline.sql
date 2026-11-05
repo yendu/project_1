@@ -1,0 +1,1 @@
+-- Baseline: starts the migration history. No tables yet; the first table arrives in 0001.

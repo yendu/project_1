@@ -12,5 +12,7 @@ export default defineConfig({
   test: {
     include: ['src/**/*.spec.ts', 'test/**/*.test.ts'],
     environment: 'node',
+    // Starts PostgreSQL in Docker once per run, so `pnpm test` needs Docker running.
+    globalSetup: ['test/support/postgres.ts'],
   },
 });

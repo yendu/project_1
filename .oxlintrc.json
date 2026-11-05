@@ -6,7 +6,8 @@
     "suspicious": "warn"
   },
   "rules": {
-    "typescript/no-extraneous-class": ["warn", { "allowWithDecorator": true }]
+    "typescript/no-extraneous-class": ["warn", { "allowWithDecorator": true }],
+    "vitest/expect-expect": ["error", { "assertFunctionNames": ["expect", "expect*"] }]
   },
   "options": {
     "denyWarnings": true,
