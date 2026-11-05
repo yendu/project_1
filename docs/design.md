@@ -50,9 +50,13 @@ and `#0f3346`.
 - Touch targets are at least 44 px.
 - Text contrast is at least 4.5:1, or 3:1 from 24 px.
 
+## Images
+
+- Every restaurant card and page header shows the restaurant's photo. Designs use illustrations
+  as stand-ins in the same slots.
+- A menu item without a photo shows the illustration for its cuisine.
+
 ## Not decided yet
 
 - Product name. Designs show `[App name]`.
-- Restaurant and menu item photos. Designs use illustrations in the same image slots.
-- Delivery time estimates.
 - A light theme.

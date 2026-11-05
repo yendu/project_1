@@ -27,6 +27,8 @@ menu_items, orders, order_items, payments, couriers, deliveries
 - Order total = items + delivery fee − discounts. Computed on the server, never trusted from the client.
   The first version has no discounts, so that term is 0 for now.
 - The delivery fee is one flat fee per restaurant, set during onboarding.
+- Each restaurant sets a fixed delivery time estimate, shown as a range such as 25–35 minutes.
+- Every restaurant has a photo, required during onboarding. Menu item photos are optional.
 - Customers can browse without an account. Placing an order requires signing in.
 - Staff only see their own restaurant's orders. Customers only see their own orders.
 - Deliveries are open offers: the first courier to accept gets the delivery. If no courier accepts
