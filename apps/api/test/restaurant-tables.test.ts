@@ -262,6 +262,11 @@ describe('restaurant and menu tables', () => {
         { stock_remaining: 3, stock_date: '2026-11-05' },
         'menu_items_stock_limit_check',
       ],
+      [
+        'a stock count above the daily limit',
+        { daily_stock: 5, stock_remaining: 6, stock_date: '2026-11-05' },
+        'menu_items_stock_ceiling_check',
+      ],
     ])('rejects %s', async (_, overrides, constraint) => {
       await expect(item(overrides)).rejects.toMatchObject({ code: CHECK_VIOLATION, constraint });
     });

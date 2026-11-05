@@ -15,6 +15,13 @@
       "when": 1793883478110,
       "tag": "0001_restaurants_and_menu",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793884901342,
+      "tag": "0002_menu_item_stock_ceiling",
+      "breakpoints": true
     }
   ]
 }

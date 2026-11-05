@@ -76,5 +76,6 @@ export const menuItems = pgTable(
       'menu_items_stock_limit_check',
       sql`${table.dailyStock} is not null or ${table.stockRemaining} is null`,
     ),
+    check('menu_items_stock_ceiling_check', sql`${table.stockRemaining} <= ${table.dailyStock}`),
   ],
 );
