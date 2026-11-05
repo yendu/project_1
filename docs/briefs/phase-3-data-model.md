@@ -2,7 +2,12 @@
 
 ## Status
 
-In progress. The data model below was approved on 2026-11-05.
+Done on 2026-11-05. The data model below is approved, and the first group of tables is built and
+applied locally. Differences from the plan:
+
+- `src/db/schema/columns.ts` holds the id and timestamp columns that every table shares.
+- `menu_categories` has an extra unique `(id, restaurant_id)`, which the foreign key from
+  `menu_items` needs to keep an item inside its own restaurant's categories.
 
 ## Goal
 
