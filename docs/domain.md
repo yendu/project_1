@@ -5,10 +5,12 @@ couriers deliver. Prices in EUR, stored as integer cents. Times stored in UTC.
 
 ## Actors
 
-- Customer: browses restaurants, orders, pays, tracks delivery (Flutter app)
+- Customer: browses restaurants, orders, pays, tracks delivery (Next.js web app)
 - Restaurant staff: manage menu and opening hours, accept and prepare orders (Next.js dashboard)
-- Courier: accepts deliveries, picks up, delivers (Flutter app)
+- Courier: accepts deliveries, picks up, delivers (Next.js web app)
 - Admin: support, refunds, restaurant onboarding
+
+Every client is a responsive web app that works in desktop and phone browsers.
 
 ## Core entities
 
