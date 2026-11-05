@@ -4,6 +4,8 @@ Rules for AI agents in this repository. Read this file and docs/domain.md before
 
 @docs/domain.md
 
+For any client UI work, also read docs/design.md.
+
 ## Stack (versions are deliberate)
 
 - Monorepo with pnpm workspaces. Backend in `apps/api`. Other apps come later.
