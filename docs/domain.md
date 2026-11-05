@@ -23,21 +23,32 @@ menu_items, orders, order_items, payments, couriers, deliveries
   even when two customers order the last one at the same moment.
 - Orders are only accepted while the restaurant is open and within its delivery radius.
 - Order total = items + delivery fee − discounts. Computed on the server, never trusted from the client.
+  The first version has no discounts, so that term is 0 for now.
 - Staff only see their own restaurant's orders. Customers only see their own orders.
+- Deliveries are open offers: the first courier to accept gets the delivery.
 
 ## Order lifecycle
 
 placed → accepted → preparing → ready_for_pickup → picked_up → delivered
 
 - From placed: rejected (by restaurant) or cancelled (by customer)
-- From accepted or preparing: cancelled (by restaurant or admin, triggers refund)
+- From accepted or preparing: cancelled (by restaurant or admin)
+- From picked_up: delivery_failed (reported by the courier when delivery isn't possible)
+- From delivery_failed: delivered or cancelled (by admin)
 - Every status change is recorded with time and actor (order_events table).
 - Invalid transitions return 409.
 
 ## Payments
 
-- Payment authorized when the order is placed; captured when delivered; refunded on cancellation.
+- Payment authorized when the order is placed; captured when delivered.
+- A rejected or cancelled order releases the authorization, so nothing was charged. Customers are
+  told their payment hold was released, never that they were refunded.
+- Refunds only apply after capture: an admin issues them after delivery.
 - Stripe in test mode. Webhooks verified by signature and processed idempotently.
+
+## Language
+
+English first. Layouts leave room for German, which is added later and needs more space.
 
 ## Out of scope for now
 
