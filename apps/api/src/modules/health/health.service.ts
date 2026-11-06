@@ -1,4 +1,5 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { withTimeout } from '../../common/with-timeout.js';
 import { HealthRepository } from './health.repository.js';
 
 export interface HealthResponse {
@@ -27,12 +28,4 @@ export class HealthService {
     }
     return { status: 'ok' };
   }
-}
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  const signal = AbortSignal.timeout(ms);
-  const timedOut = new Promise<never>((_resolve, reject) => {
-    signal.addEventListener('abort', () => reject(signal.reason), { once: true });
-  });
-  return Promise.race([promise, timedOut]);
 }

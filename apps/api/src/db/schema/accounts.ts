@@ -3,6 +3,7 @@ import { check, pgTable, text, unique, uuid } from 'drizzle-orm/pg-core';
 import { primaryId, timestamps } from './columns.js';
 
 export const USER_ROLES = ['customer', 'restaurant_staff', 'courier', 'admin'] as const;
+export type UserRole = (typeof USER_ROLES)[number];
 
 /** One row per login. Firebase proves who someone is; the role here decides what they can do. */
 export const users = pgTable(

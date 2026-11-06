@@ -11,7 +11,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
-  // Comma-separated. Empty means no cross-origin access; mobile apps don't need CORS.
+  // Comma-separated. Empty means no cross-origin access.
   CORS_ORIGINS: z
     .string()
     .max(2_000)
@@ -31,6 +31,16 @@ const envSchema = z.object({
     })
     .max(2_000),
   DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
+  // Tokens are only accepted for this project. Not a secret.
+  FIREBASE_PROJECT_ID: z.string().regex(/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/, {
+    error: 'Must be a Firebase project ID such as demo-food-delivery',
+  }),
+  // The first admin: this address becomes an admin on first sign-in.
+  ADMIN_EMAIL: z
+    .email()
+    .max(254)
+    .transform((value) => value.toLowerCase())
+    .optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

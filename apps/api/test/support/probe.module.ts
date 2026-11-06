@@ -7,6 +7,12 @@ import {
   NotFoundError,
 } from '../../src/common/errors/app-error.js';
 import { DB, type Database } from '../../src/db/database.js';
+import {
+  CurrentUser,
+  Public,
+  Roles,
+  type CurrentAccount,
+} from '../../src/modules/auth/auth.decorators.js';
 
 const probeOrderSchema = z.strictObject({
   name: z.string().trim().min(1).max(50),
@@ -26,6 +32,7 @@ const probeValueSchema = z.strictObject({ value: z.string().max(100) });
 type ProbeValue = z.infer<typeof probeValueSchema>;
 
 /** Test-only routes for exercising app-wide behavior. Never imported by the app itself. */
+@Public()
 @Controller('probe')
 class ProbeController {
   constructor(@Inject(DB) private readonly db: Database) {}
@@ -89,5 +96,26 @@ class ProbeController {
   }
 }
 
-@Module({ controllers: [ProbeController] })
+/** Test-only routes with no `@Public()`, so they show what the sign-in guard does by default. */
+@Controller('probe/protected')
+class ProtectedProbeController {
+  @Get('whoami')
+  whoami(@CurrentUser() account: CurrentAccount): CurrentAccount {
+    return account;
+  }
+
+  @Roles('admin')
+  @Get('admin-only')
+  adminOnly(): { ok: true } {
+    return { ok: true };
+  }
+
+  @Public()
+  @Get('opened')
+  opened(): { ok: true } {
+    return { ok: true };
+  }
+}
+
+@Module({ controllers: [ProbeController, ProtectedProbeController] })
 export class ProbeModule {}

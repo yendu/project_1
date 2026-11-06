@@ -7,6 +7,7 @@ import { createHttpLogger, HTTP_LOGGER, logSerializers } from './common/logging/
 import { createValidationPipe } from './common/validation.js';
 import type { Env } from './config/env.js';
 import { DatabaseModule } from './db/database.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 
 export interface AppModuleOptions {
@@ -28,6 +29,7 @@ export class AppModule {
           useExisting: true,
         }),
         DatabaseModule.forRoot(env),
+        AuthModule.forRoot(env),
         HealthModule,
       ],
       providers: [
