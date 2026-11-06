@@ -2,7 +2,17 @@
 
 ## Status
 
-In progress. The plan was approved on 2026-11-06.
+Done on 2026-11-06, except for a real Google sign-in, which needs a web app and a Firebase project.
+Differences from the plan:
+
+- The API also rejects any token that didn't come from Google, so the rule doesn't rest on the
+  Firebase console alone.
+- `firebase-admin` sets no timeout on its key fetch, so the token check has its own 5 s limit.
+  `withTimeout` moved to `src/common/with-timeout.ts`, and `/readyz` shares it.
+- A token that can't be checked answers 503, because the token itself may be fine. Firebase
+  reports a failed key fetch with the same code as a bad token, so the check reads its message.
+  An update to `firebase-admin` could change that text.
+- A Google account whose email already belongs to another account gets a 409 `email_in_use`.
 
 ## Goal
 

@@ -20,6 +20,8 @@ For any client UI work, also read docs/design.md.
 - PostgreSQL 18 (Docker locally), Drizzle ORM 0.45 + drizzle-kit 0.31, node-postgres (`pg`)
 - Vitest 5 with Vite 8 (a required peer). Vite's Oxc transform emits the decorator metadata
   Nest DI needs (`oxc.decorator` in `vitest.config.ts`); no SWC.
+- Firebase Auth for Google sign-in. `firebase-admin` only checks tokens, which needs the project
+  ID and no service account key.
 - Testcontainers 12 (real PostgreSQL in tests), supertest
 - oxlint, Prettier, pino via nestjs-pino
 
@@ -29,8 +31,8 @@ official docs. Never guess an API, flag or config key.
 
 ## Commands (run from the repo root)
 
-- `pnpm dev`: run the API with reload. Needs `pnpm db:up` and `DATABASE_URL`: copy
-  `apps/api/.env.example` to `apps/api/.env`, which is loaded if present.
+- `pnpm dev`: run the API with reload. Needs `pnpm db:up`, `DATABASE_URL` and
+  `FIREBASE_PROJECT_ID`: copy `apps/api/.env.example` to `apps/api/.env`, which is loaded if present.
   Don't switch to `nest start --env-file`: Node itself exits when that file is missing.
 - `pnpm check`: lint, typecheck and all tests. Must pass before any task is done.
 - `pnpm lint`: oxlint + `prettier --check`. `pnpm format` rewrites files with Prettier.
@@ -40,8 +42,8 @@ official docs. Never guess an API, flag or config key.
 - `pnpm db:up` / `pnpm db:down`: start local PostgreSQL and wait until it's healthy / stop it.
   `db:down` keeps the data.
 - `pnpm db:generate`: SQL migration from schema changes. Add `--custom --name=<name>` for an
-  empty one to write by hand.
-- `pnpm db:migrate`: apply migrations to `DATABASE_URL`.
+  empty one to write by hand. Reads the same settings as the app, so it needs a complete `.env`.
+- `pnpm db:migrate`: apply migrations to `DATABASE_URL`. Also needs a complete `.env`.
 
 Keep this list accurate when scripts change.
 
@@ -77,12 +79,16 @@ Keep this list accurate when scripts change.
   its `index.ts`, with the shared id and timestamp columns in `columns.ts`. SQL migrations in
   `apps/api/drizzle/`.
 - `src/common/`: errors, validation, logging, request IDs.
+- `src/modules/auth/`: a global guard closes every route. Open one with `@Public()`, limit it with
+  `@Roles()`, and read the caller with `@CurrentUser()`. `src/modules/accounts/` owns `users` and
+  `customers`, including first sign-in.
 - `src/modules/<feature>/`: thin controller (parse, call one service method, return),
   service (business rules), repository (all DB access for the module), Zod schemas, module file.
 - Modules never query another module's tables. They call that module's service.
 - Integration tests in `apps/api/test/` as `*.test.ts`; unit tests next to code as `*.spec.ts`.
   Build the app with `createTestApp()` from `test/support/`. Test-only routes go in
   `test/support/probe.module.ts`; `LogCapture` asserts on real log output.
+  Test apps use `FakeTokenVerifier` instead of Firebase: sign in with `tokenFor(googleAccount())`.
 - `test/support/postgres.ts` starts one migrated PostgreSQL per test run, and every test app uses
   it (`inject('databaseUrl')` gives the URL). Its image must match `docker-compose.yml`.
 - ESM with `nodenext`: relative imports end in `.js`. Classes injected through a constructor
@@ -131,7 +137,7 @@ Keep this list accurate when scripts change.
   Log errors as `{ err }`: `src/common/logging/serialize-error.ts` is an allow-list too, and keeps
   query parameters, row values and connection details out of the logs.
 - Authorization: deny by default, ownership enforced inside the query, tokens verified (never decode-only).
-- Every outbound HTTP call has a timeout. No fetching user-supplied URLs without an allow-list.
+- Every outbound HTTP call has a timeout, including ones a library makes for us. No fetching user-supplied URLs without an allow-list.
 - Keep helmet, the CORS allow-list (`CORS_ORIGINS`) and the 100 kB JSON body limit
   (`src/app.setup.ts`).
 
