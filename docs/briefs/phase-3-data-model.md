@@ -21,7 +21,7 @@ timestamps aren't repeated below.
 
 | Group       | Table              | Main columns                                                                                                                                                        |
 | ----------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Login       | `users`            | email, password_hash, role                                                                                                                                          |
+| Login       | `users`            | email, firebase_uid, role                                                                                                                                           |
 | Customers   | `customers`        | user_id, name, phone                                                                                                                                                |
 |             | `addresses`        | customer_id, street, postal_code, city, latitude, longitude                                                                                                         |
 | Restaurants | `restaurants`      | name, cuisine, status, street, postal_code, city, latitude, longitude, delivery_radius_m, delivery_fee_cents, delivery_minutes_min, delivery_minutes_max, photo_key |
@@ -44,7 +44,8 @@ timestamps aren't repeated below.
   is never called inside a transaction. So an order starts as `payment_pending`, which reserves
   stock and stays hidden from customers and staff. It becomes `placed` when the card hold
   succeeds, or `expired` after 15 minutes.
-- **Logins.** One `users` table for every kind of account, with one role per account.
+- **Logins.** One `users` table for every kind of account, with one role per account. Sign-in is
+  Google only, through Firebase Auth, so no passwords are stored. See the Phase 4 brief.
 - **Location.** Plain latitude and longitude columns, without PostGIS, for one city. Turning an
   address into coordinates needs an outside service, chosen when addresses are built.
 - **Cart.** It lives in the browser, so there's no table. The server recalculates prices.
@@ -67,7 +68,7 @@ timestamps aren't repeated below.
 ## Build order
 
 1. Restaurants and menu: this phase.
-2. Users, customers, addresses and `restaurant_staff`, together with login.
+2. Users and customers, together with login (Phase 4). Addresses and `restaurant_staff` follow with their features.
 3. Orders and stock.
 4. Payments.
 5. Couriers and deliveries.

@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { loadEnv } from './env.js';
 
 const DATABASE_URL = 'postgres://food_delivery:food_delivery@localhost:5432/food_delivery';
+const FIREBASE_PROJECT_ID = 'demo-food-delivery';
 // Variables without a default, so each test only states what it is about.
-const required = { DATABASE_URL };
+const required = { DATABASE_URL, FIREBASE_PROJECT_ID };
 
 describe('loadEnv', () => {
   it('applies defaults when optional variables are missing', () => {
@@ -14,6 +15,7 @@ describe('loadEnv', () => {
       CORS_ORIGINS: [],
       DATABASE_URL,
       DATABASE_POOL_MAX: 10,
+      FIREBASE_PROJECT_ID,
     });
   });
 
@@ -25,7 +27,32 @@ describe('loadEnv', () => {
       CORS_ORIGINS: [],
       DATABASE_URL,
       DATABASE_POOL_MAX: 10,
+      FIREBASE_PROJECT_ID,
     });
+  });
+
+  it('requires FIREBASE_PROJECT_ID', () => {
+    expect(() => loadEnv({ DATABASE_URL })).toThrow(/FIREBASE_PROJECT_ID/);
+  });
+
+  it.each(['', 'UPPER-case', 'has space', 'x'])('rejects FIREBASE_PROJECT_ID=%j', (projectId) => {
+    expect(() => loadEnv({ ...required, FIREBASE_PROJECT_ID: projectId })).toThrow(
+      /FIREBASE_PROJECT_ID/,
+    );
+  });
+
+  it('leaves ADMIN_EMAIL out when it is not set', () => {
+    expect(loadEnv(required).ADMIN_EMAIL).toBeUndefined();
+  });
+
+  it('stores ADMIN_EMAIL in lowercase', () => {
+    expect(loadEnv({ ...required, ADMIN_EMAIL: 'Ada@Example.com' }).ADMIN_EMAIL).toBe(
+      'ada@example.com',
+    );
+  });
+
+  it('rejects an ADMIN_EMAIL that is not an email', () => {
+    expect(() => loadEnv({ ...required, ADMIN_EMAIL: 'not-an-email' })).toThrow(/ADMIN_EMAIL/);
   });
 
   it('ignores unrelated variables', () => {
@@ -80,13 +107,13 @@ describe('loadEnv', () => {
     'postgres://app:secret@db.internal:5432/app',
     'postgresql://app:secret@db.internal/app?sslmode=require',
   ])('accepts DATABASE_URL=%j', (url) => {
-    expect(loadEnv({ DATABASE_URL: url }).DATABASE_URL).toBe(url);
+    expect(loadEnv({ ...required, DATABASE_URL: url }).DATABASE_URL).toBe(url);
   });
 
   it.each(['', 'localhost:5432/app', 'mysql://app:secret@db.internal/app', 'https://db.internal'])(
     'rejects DATABASE_URL=%j',
     (url) => {
-      expect(() => loadEnv({ DATABASE_URL: url })).toThrow(/DATABASE_URL/);
+      expect(() => loadEnv({ ...required, DATABASE_URL: url })).toThrow(/DATABASE_URL/);
     },
   );
 

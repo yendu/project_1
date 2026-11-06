@@ -29,6 +29,10 @@ The full data model is in docs/briefs/phase-3-data-model.md.
 - Stock comes back when an order expires, is rejected, or is cancelled before preparing. After
   that the food is being made, so it doesn't.
 - Every login is one row in users, with one role per account.
+- Sign-in is Google only, through Firebase Auth, for every role. Firebase proves who someone is.
+  Roles live in users, never in Firebase.
+- Anyone who signs in becomes a customer, unless an admin added their email with another role
+  first. Their first sign-in then links to that row. The first admin comes from ADMIN_EMAIL.
 - The cart lives in the browser. At checkout the server recalculates every price.
 - Orders are only accepted while the restaurant is open and within its delivery radius.
 - Order total = items + delivery fee − discounts. Computed on the server, never trusted from the client.
